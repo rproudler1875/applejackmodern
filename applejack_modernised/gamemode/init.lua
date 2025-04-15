@@ -29,66 +29,67 @@ util.AddNetworkString("AJMRP_AcceptTrade")
 util.AddNetworkString("AJMRP_SyncInventory")
 
 function GM:Initialize()
- print("[AJMRP] AppleJack Modernised RP loaded!")
+    print("[AJMRP] AppleJack Modernised RP loaded!")
+    spawnmenu.Init() -- Initialize spawn menu system
 end
 
 function GM:PlayerInitialSpawn(ply)
- ply:LoadCharacter()
- ply:LoadJob()
- ply:LoadEconomy()
- ply:LoadInventory()
- ply:SetHunger(AJMRP.Config.MaxHunger)
- ply:SetStamina(AJMRP.Config.MaxStamina)
- ply.firstJoin = true
+    ply:LoadCharacter()
+    ply:LoadJob()
+    ply:LoadEconomy()
+    ply:LoadInventory()
+    ply:SetHunger(AJMRP.Config.MaxHunger)
+    ply:SetStamina(AJMRP.Config.MaxStamina)
+    ply.firstJoin = true
 end
 
 function GM:PlayerSpawn(ply)
- self.BaseClass:PlayerSpawn(ply) -- Call sandbox spawn
- ply:Give("weapon_ajmrp_keys") -- Give keys
- ply:Give("weapon_physgun") -- Give physics gun
+    self.BaseClass:PlayerSpawn(ply) -- Call sandbox spawn
+    ply:Give("weapon_ajmrp_keys") -- Give keys
+    ply:Give("weapon_physgun") -- Give physics gun
 end
 
 function GM:PlayerDisconnected(ply)
- ply:SaveCharacter()
- ply:SaveJob()
- ply:SaveEconomy()
- ply:SaveInventory()
- if IsValid(ply.printer) then
- ply.printer:Remove()
- end
+    ply:SaveCharacter()
+    ply:SaveJob()
+    ply:SaveEconomy()
+    ply:SaveInventory()
+    if IsValid(ply.printer) then
+        ply.printer:Remove()
+    end
 end
 
 -- Allow all players to use spawn menu
 function GM:PlayerSpawnedProp(ply, model, ent)
- return true -- Allow prop spawning
+    return true -- Allow prop spawning
 end
 
 function GM:PlayerSpawnedNPC(ply, ent)
- return true -- Allow NPC spawning
+    return true
 end
 
 function GM:PlayerSpawnedVehicle(ply, ent)
- return true -- Allow vehicle spawning
+    return true
 end
 
 function GM:PlayerSpawnedSENT(ply, ent)
- return true -- Allow scripted entity spawning
+    return true
 end
 
 function GM:PlayerSpawnedWeapon(ply, ent)
- return true -- Allow weapon spawning
+    return true
 end
 
 function GM:PlayerSpawnedEffect(ply, model, ent)
- return true -- Allow effect spawning
+    return true
 end
 
 function GM:PlayerSpawnedRagdoll(ply, model, ent)
- return true -- Allow ragdoll spawning
+    return true
 end
 
 concommand.Add("ajmrp_toggle_hud", function(ply)
- if IsValid(ply) then
- ply:ChatPrint("Use this command in client console to toggle HUD.")
- end
+    if IsValid(ply) then
+        ply:ChatPrint("Use this command in client console to toggle HUD.")
+    end
 end)
