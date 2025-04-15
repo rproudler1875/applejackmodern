@@ -56,108 +56,7 @@ local function CreateCharacterTab(frame)
     return charPanel
 end
 
--- Shop Tab: Lists items with name, description, price, weight, and buy button
-local function CreateShopTab(frame)
-    if not IsValid(LocalPlayer()) then
-        print("[AJMRP] CreateShopTab: LocalPlayer not valid")
-        return
-    end
-    if not AJMRP.Config then
-        print("[AJMRP] CreateShopTab: AJMRP.Config not loaded")
-        return
-    end
-
-    local shopPanel = vgui.Create("DPanel", frame)
-    shopPanel:SetSize(frame:GetWide() - 20, frame:GetTall() - 20)
-    shopPanel:SetPos(10, 10)
-    shopPanel.Paint = function(self, w, h)
-        draw.RoundedBox(8, 0, 0, w, h, Color(50, 50, 50, 220))
-    end
-
-    local scroll = vgui.Create("DScrollPanel", shopPanel)
-    scroll:SetSize(shopPanel:GetWide() - 20, shopPanel:GetTall() - 20)
-    scroll:SetPos(10, 10)
-
-    local layout = vgui.Create("DIconLayout", scroll)
-    layout:SetSize(scroll:GetWide(), scroll:GetTall())
-    layout:SetPos(0, 0)
-    layout:SetSpaceX(10)
-    layout:SetSpaceY(10)
-
-    for id, item in pairs(AJMRP.Config.Items or {}) do
-        local allowed = false
-        for _, job in ipairs(item.jobs or {}) do
-            if job == (LocalPlayer():GetJob() or "citizen") then
-                allowed = true
-                break
-            end
-        end
-
-        local itemPanel = layout:Add("DPanel")
-        itemPanel:SetSize(200, 250)
-        itemPanel.Paint = function(self, w, h)
-            draw.RoundedBox(4, 0, 0, w, h, Color(30, 30, 30, 200))
-        end
-
-        -- Item Name
-        local nameLabel = vgui.Create("DLabel", itemPanel)
-        nameLabel:SetSize(180, 20)
-        nameLabel:SetPos(10, 10)
-        nameLabel:SetText(item.name or "Unknown Item")
-        nameLabel:SetFont("DermaDefault")
-        nameLabel:SetTextColor(Color(255, 255, 255, 220))
-        nameLabel:SetContentAlignment(5)
-
-        -- Description
-        local descLabel = vgui.Create("DLabel", itemPanel)
-        descLabel:SetSize(180, 60)
-        descLabel:SetPos(10, 40)
-        descLabel:SetText(item.description or "A useful item for your roleplay adventures.")
-        descLabel:SetFont("DermaDefault")
-        descLabel:SetTextColor(Color(255, 255, 255, 220))
-        descLabel:SetWrap(true)
-        descLabel:SetContentAlignment(5)
-
-        -- Price
-        local priceLabel = vgui.Create("DLabel", itemPanel)
-        priceLabel:SetSize(180, 20)
-        priceLabel:SetPos(10, 110)
-        priceLabel:SetText("Price: " .. (item.price or 0) .. " Credits")
-        priceLabel:SetFont("DermaDefault")
-        priceLabel:SetTextColor(Color(255, 255, 255, 220))
-        priceLabel:SetContentAlignment(5)
-
-        -- Weight
-        local weightLabel = vgui.Create("DLabel", itemPanel)
-        weightLabel:SetSize(180, 20)
-        weightLabel:SetPos(10, 140)
-        weightLabel:SetText("Weight: " .. (item.weight or 0))
-        weightLabel:SetFont("DermaDefault")
-        weightLabel:SetTextColor(Color(255, 255, 255, 220))
-        weightLabel:SetContentAlignment(5)
-
-        -- Buy Button
-        local buyButton = vgui.Create("DButton", itemPanel)
-        buyButton:SetSize(100, 30)
-        buyButton:SetPos(50, 200)
-        buyButton:SetText("Buy")
-        buyButton:SetFont("DermaDefault")
-        buyButton:SetTextColor(Color(255, 255, 255, 220))
-        buyButton.Paint = function(self, w, h)
-            draw.RoundedBox(4, 0, 0, w, h, self:IsHovered() and Color(0, 120, 0, 200) or Color(0, 80, 0, 200))
-        end
-        buyButton:SetEnabled(allowed)
-        buyButton.DoClick = function()
-            net.Start("AJMRP_BuyItem")
-            net.WriteString(id)
-            net.SendToServer()
-        end
-    end
-
-    return shopPanel
-end
-
--- Jobs Tab: Lists all available jobs
+-- Jobs Tab: Lists all available jobs in a vertical list with title, description, salary, and switch button
 local function CreateJobsTab(frame)
     if not IsValid(LocalPlayer()) then
         print("[AJMRP] CreateJobsTab: LocalPlayer not valid")
@@ -179,29 +78,155 @@ local function CreateJobsTab(frame)
     scroll:SetSize(jobsPanel:GetWide() - 20, jobsPanel:GetTall() - 20)
     scroll:SetPos(10, 10)
 
-    local layout = vgui.Create("DIconLayout", scroll)
-    layout:SetSize(scroll:GetWide(), scroll:GetTall())
-    layout:SetPos(0, 0)
-    layout:SetSpaceX(10)
-    layout:SetSpaceY(10)
-
+    local yPos = 0
     for jobID, jobData in pairs(AJMRP.Config.Jobs or {}) do
-        local jobPanel = layout:Add("DPanel")
-        jobPanel:SetSize(200, 60)
+        local jobPanel = vgui.Create("DPanel", scroll)
+        jobPanel:SetSize(scroll:GetWide() - 20, 120) -- Increased height for more content
+        jobPanel:SetPos(0, yPos)
         jobPanel.Paint = function(self, w, h)
             draw.RoundedBox(4, 0, 0, w, h, Color(30, 30, 30, 200))
         end
 
+        -- Job Title
         local nameLabel = vgui.Create("DLabel", jobPanel)
-        nameLabel:SetSize(180, 20)
-        nameLabel:SetPos(10, 20)
+        nameLabel:SetSize(300, 20)
+        nameLabel:SetPos(10, 10)
         nameLabel:SetText(jobData.name or "Unknown Job")
         nameLabel:SetFont("DermaDefault")
         nameLabel:SetTextColor(Color(255, 255, 255, 220))
-        nameLabel:SetContentAlignment(5)
+
+        -- Description
+        local descLabel = vgui.Create("DLabel", jobPanel)
+        descLabel:SetSize(300, 40)
+        descLabel:SetPos(10, 30)
+        descLabel:SetText(jobData.description or "A role in the city with specific duties.")
+        descLabel:SetFont("DermaDefault")
+        descLabel:SetTextColor(Color(255, 255, 255, 220))
+        descLabel:SetWrap(true)
+
+        -- Salary
+        local salaryLabel = vgui.Create("DLabel", jobPanel)
+        salaryLabel:SetSize(300, 20)
+        salaryLabel:SetPos(10, 70)
+        salaryLabel:SetText("Salary: " .. (jobData.salary or 100) .. " Credits")
+        salaryLabel:SetFont("DermaDefault")
+        salaryLabel:SetTextColor(Color(255, 255, 255, 220))
+
+        -- Switch Job Button
+        local switchButton = vgui.Create("DButton", jobPanel)
+        switchButton:SetSize(100, 30)
+        switchButton:SetPos(jobPanel:GetWide() - 110, 80)
+        switchButton:SetText("Switch Job")
+        switchButton:SetFont("DermaDefault")
+        switchButton:SetTextColor(Color(255, 255, 255, 220))
+        switchButton.Paint = function(self, w, h)
+            draw.RoundedBox(4, 0, 0, w, h, self:IsHovered() and Color(0, 120, 0, 200) or Color(0, 80, 0, 200))
+        end
+        switchButton.DoClick = function()
+            net.Start("AJMRP_SwitchJob")
+            net.WriteString(jobID)
+            net.SendToServer()
+        end
+
+        yPos = yPos + 130 -- Space between entries
     end
 
     return jobsPanel
+end
+
+-- Shop Tab: Lists items in a vertical list with name, description, price, weight, and buy button
+local function CreateShopTab(frame)
+    if not IsValid(LocalPlayer()) then
+        print("[AJMRP] CreateShopTab: LocalPlayer not valid")
+        return
+    end
+    if not AJMRP.Config then
+        print("[AJMRP] CreateShopTab: AJMRP.Config not loaded")
+        return
+    end
+
+    local shopPanel = vgui.Create("DPanel", frame)
+    shopPanel:SetSize(frame:GetWide() - 20, frame:GetTall() - 20)
+    shopPanel:SetPos(10, 10)
+    shopPanel.Paint = function(self, w, h)
+        draw.RoundedBox(8, 0, 0, w, h, Color(50, 50, 50, 220))
+    end
+
+    local scroll = vgui.Create("DScrollPanel", shopPanel)
+    scroll:SetSize(shopPanel:GetWide() - 20, shopPanel:GetTall() - 20)
+    scroll:SetPos(10, 10)
+
+    local yPos = 0
+    for id, item in pairs(AJMRP.Config.Items or {}) do
+        local allowed = false
+        for _, job in ipairs(item.jobs or {}) do
+            if job == (LocalPlayer():GetJob() or "citizen") then
+                allowed = true
+                break
+            end
+        end
+
+        local itemPanel = vgui.Create("DPanel", scroll)
+        itemPanel:SetSize(scroll:GetWide() - 20, 150)
+        itemPanel:SetPos(0, yPos)
+        itemPanel.Paint = function(self, w, h)
+            draw.RoundedBox(4, 0, 0, w, h, Color(30, 30, 30, 200))
+        end
+
+        -- Item Name
+        local nameLabel = vgui.Create("DLabel", itemPanel)
+        nameLabel:SetSize(300, 20)
+        nameLabel:SetPos(10, 10)
+        nameLabel:SetText(item.name or "Unknown Item")
+        nameLabel:SetFont("DermaDefault")
+        nameLabel:SetTextColor(Color(255, 255, 255, 220))
+
+        -- Description
+        local descLabel = vgui.Create("DLabel", itemPanel)
+        descLabel:SetSize(300, 40)
+        descLabel:SetPos(10, 30)
+        descLabel:SetText(item.description or "A useful item for your roleplay adventures.")
+        descLabel:SetFont("DermaDefault")
+        descLabel:SetTextColor(Color(255, 255, 255, 220))
+        descLabel:SetWrap(true)
+
+        -- Price
+        local priceLabel = vgui.Create("DLabel", itemPanel)
+        priceLabel:SetSize(300, 20)
+        priceLabel:SetPos(10, 70)
+        priceLabel:SetText("Price: " .. (item.price or 0) .. " Credits")
+        priceLabel:SetFont("DermaDefault")
+        priceLabel:SetTextColor(Color(255, 255, 255, 220))
+
+        -- Weight
+        local weightLabel = vgui.Create("DLabel", itemPanel)
+        weightLabel:SetSize(300, 20)
+        weightLabel:SetPos(10, 90)
+        weightLabel:SetText("Weight: " .. (item.weight or 0))
+        weightLabel:SetFont("DermaDefault")
+        weightLabel:SetTextColor(Color(255, 255, 255, 220))
+
+        -- Buy Button
+        local buyButton = vgui.Create("DButton", itemPanel)
+        buyButton:SetSize(100, 30)
+        buyButton:SetPos(itemPanel:GetWide() - 110, 110)
+        buyButton:SetText("Buy")
+        buyButton:SetFont("DermaDefault")
+        buyButton:SetTextColor(Color(255, 255, 255, 220))
+        buyButton.Paint = function(self, w, h)
+            draw.RoundedBox(4, 0, 0, w, h, self:IsHovered() and Color(0, 120, 0, 200) or Color(0, 80, 0, 200))
+        end
+        buyButton:SetEnabled(allowed)
+        buyButton.DoClick = function()
+            net.Start("AJMRP_BuyItem")
+            net.WriteString(id)
+            net.SendToServer()
+        end
+
+        yPos = yPos + 160 -- Space between entries
+    end
+
+    return shopPanel
 end
 
 -- Inventory Tab: Grid-based inventory with drag-and-drop, stacking, and limits
@@ -444,20 +469,20 @@ local function CreateMainMenu()
             print("[AJMRP] Failed to create Character tab")
         end
 
+        -- Jobs Tab (moved before Shop tab)
+        local jobsTab = CreateJobsTab(frame)
+        if jobsTab then
+            tabs:AddSheet("Jobs", jobsTab, "icon16/briefcase.png")
+        else
+            print("[AJMRP] Failed to create Jobs tab")
+        end
+
         -- Shop Tab
         local shopTab = CreateShopTab(frame)
         if shopTab then
             tabs:AddSheet("Shop", shopTab, "icon16/cart.png")
         else
             print("[AJMRP] Failed to create Shop tab")
-        end
-
-        -- Jobs Tab
-        local jobsTab = CreateJobsTab(frame)
-        if jobsTab then
-            tabs:AddSheet("Jobs", jobsTab, "icon16/briefcase.png")
-        else
-            print("[AJMRP] Failed to create Jobs tab")
         end
 
         -- Inventory Tab
