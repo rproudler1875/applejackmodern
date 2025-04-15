@@ -218,6 +218,7 @@ local function CreateShopTab(frame)
         end
         buyButton:SetEnabled(allowed)
         buyButton.DoClick = function()
+            print("[AJMRP] Sending AJMRP_BuyItem for item: " .. id)
             net.Start("AJMRP_BuyItem")
             net.WriteString(id)
             net.SendToServer()
@@ -431,11 +432,8 @@ end
 net.Receive("AJMRP_BuyItemResponse", function()
     local success = net.ReadBool()
     local message = net.ReadString()
-    if IsValid(LocalPlayer()) then
-        LocalPlayer():ChatPrint(message)
-    else
-        print("[AJMRP] BuyItemResponse: LocalPlayer not valid")
-    end
+    print("[AJMRP] Received AJMRP_BuyItemResponse: " .. tostring(success) .. " - " .. message)
+    chat.AddText(Color(255, 255, 255), "[Shop] ", Color(200, 200, 200), message)
 end)
 
 -- Main menu creation function
