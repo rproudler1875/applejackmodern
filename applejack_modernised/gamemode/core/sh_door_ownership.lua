@@ -14,6 +14,13 @@ local function GetDoorKey(ent)
     return string.format("%f_%f_%f_%f_%f_%f", pos.x, pos.y, pos.z, ang.p, ang.y, ang.r)
 end
 
+-- Check if an entity is a door
+local function IsDoor(ent)
+    if not IsValid(ent) then return false end
+    local class = ent:GetClass()
+    return class == "func_door" or class == "func_door_rotating" or class == "prop_door_rotating"
+end
+
 -- Load door data from file
 local function LoadDoorData()
     if file.Exists(DATA_PATH, "DATA") then
@@ -53,7 +60,7 @@ end
 
 -- Check if a door can be purchased
 function AJMRP.CanBuyDoor(ply, ent)
-    if not IsValid(ent) or not ent:IsDoor() then
+    if not IsValid(ent) or not IsDoor(ent) then
         return false, "Not a valid door!"
     end
     if not ent:GetNWBool("AJMRP_IsParent") then
@@ -144,7 +151,7 @@ if SERVER then
     -- Unbuy door command
     concommand.Add("ajmrp_unbuy_door", function(ply)
         local ent = ply:GetEyeTrace().Entity
-        if not IsValid(ent) or not ent:IsDoor() then
+        if not IsValid(ent) or not IsDoor(ent) then
             ply:ChatPrint("Not a valid door!")
             return
         end
@@ -173,7 +180,7 @@ if SERVER then
                 return ""
             end
             local ent = ply:GetEyeTrace().Entity
-            if not IsValid(ent) or not ent:IsDoor() then
+            if not IsValid(ent) or not IsDoor(ent) then
                 ply:ChatPrint("You must be looking at a door!")
                 return ""
             end
@@ -213,7 +220,7 @@ if SERVER then
                 return ""
             end
             local ent = ply:GetEyeTrace().Entity
-            if not IsValid(ent) or not ent:IsDoor() then
+            if not IsValid(ent) or not IsDoor(ent) then
                 ply:ChatPrint("You must be looking at a door!")
                 return ""
             end
@@ -245,7 +252,7 @@ if CLIENT then
     hook.Add("HUDPaint", "AJMRP_DoorInfo", function()
         local ply = LocalPlayer()
         local ent = ply:GetEyeTrace().Entity
-        if IsValid(ent) and ent:IsDoor() and ent:GetPos():DistToSqr(ply:GetPos()) < 10000 then -- Within ~100 units
+        if IsValid(ent) and IsDoor(ent) and ent:GetPos():DistToSqr(ply:GetPos()) < 10000 then -- Within ~100 units
             local name = ent:GetNWString("AJMRP_DoorName", "")
             if name != "" then
                 draw.SimpleText("Door: " .. name, "DermaDefault", ScrW() / 2, ScrH() / 2 + 20, Color(255, 255, 255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
