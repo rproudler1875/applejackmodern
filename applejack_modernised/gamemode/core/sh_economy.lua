@@ -104,11 +104,21 @@ function meta:SaveInventory()
 end
 
 function AJMRP.BuyItem(ply, item_id)
-    if not IsValid(ply) or not AJMRP.Config.Items[item_id] then
+    print("[AJMRP] BuyItem called for player " .. ply:Nick() .. " with item_id " .. tostring(item_id))
+    
+    if not IsValid(ply) then
+        print("[AJMRP] BuyItem: Player is not valid")
+        return false, "Purchase failed: Player is not valid!"
+    end
+    
+    if not AJMRP.Config.Items[item_id] then
+        print("[AJMRP] BuyItem: Invalid item ID - " .. tostring(item_id))
         return false, "Invalid item!"
     end
     
     local item = AJMRP.Config.Items[item_id]
+    print("[AJMRP] BuyItem: Item - " .. item.name)
+    
     local allowed = false
     for _, job in ipairs(item.jobs) do
         if job == ply:GetJob() then
@@ -118,19 +128,23 @@ function AJMRP.BuyItem(ply, item_id)
     end
     
     if not allowed then
+        print("[AJMRP] BuyItem: Job restriction failed for " .. ply:GetJob() .. " (required: " .. table.concat(item.jobs, ", ") .. ")")
         return false, "Cannot buy " .. item.name .. ": Restricted to " .. table.concat(item.jobs, ", ") .. "!"
     end
     
     local credits = ply:GetCredits()
     if credits < item.price then
+        print("[AJMRP] BuyItem: Not enough credits - " .. credits .. "/" .. item.price)
         return false, "Cannot buy " .. item.name .. ": Need " .. item.price .. " Credits, you have " .. credits .. "!"
     end
     
     -- Deduct Credits
+    print("[AJMRP] BuyItem: Deducting " .. item.price .. " credits from " .. ply:Nick())
     ply:AddCredits(-item.price)
     
     -- Handle item
     if item.entity then
+        print("[AJMRP] BuyItem: Spawning entity " .. item.entity)
         -- Spawn entity in front of player
         local pos = ply:EyePos()
         local ang = ply:GetAimVector()
@@ -145,10 +159,12 @@ function AJMRP.BuyItem(ply, item_id)
         
         if tr.Hit then
             spawnPos = tr.HitPos - ang * 10 -- Move back slightly
+            print("[AJMRP] BuyItem: Adjusted spawn position due to wall hit")
         end
         
-        local ent = ents.Create(item.entity)
-        if not IsValid(ent) then
+        local success, ent = pcall(ents.Create, item.entity)
+        if not success or not IsValid(ent) then
+            print("[AJMRP] BuyItem: Failed to create entity - " .. tostring(ent))
             ply:AddCredits(item.price) -- Refund
             return false, "Failed to spawn " .. item.name .. ": Entity '" .. item.entity .. "' could not be created!"
         end
@@ -157,35 +173,54 @@ function AJMRP.BuyItem(ply, item_id)
         -- Set the owner for entities like the money printer
         if ent.SetOwner then
             ent:SetOwner(ply)
+            print("[AJMRP] BuyItem: SetOwner called for entity")
         elseif ent.Setowning_ent then -- Fallback for some entities
             ent:Setowning_ent(ply)
+            print("[AJMRP] BuyItem: Setowning_ent called for entity")
         end
         ent.owner = ply -- Directly set the owner field as per ajmrp_printer/init.lua
-        ent:Spawn()
+        print("[AJMRP] BuyItem: Owner set to " .. ply:Nick())
+        
+        local spawnSuccess, spawnErr = pcall(function() ent:Spawn() end)
+        if not spawnSuccess then
+            print("[AJMRP] BuyItem: Spawn failed - " .. tostring(spawnErr))
+            ent:Remove()
+            ply:AddCredits(item.price) -- Refund
+            return false, "Failed to spawn " .. item.name .. ": " .. tostring(spawnErr)
+        end
+        
         ent:DropToFloor()
+        print("[AJMRP] BuyItem: Entity spawned at " .. tostring(spawnPos))
         
         -- Special handling for money printer
         if item.entity == "ajmrp_printer" then
             if IsValid(ply.printer) then
-                ply.printer:Remove() -- Remove existing printer if any
+                ply.printer:Remove()
+                print("[AJMRP] BuyItem: Removed existing printer for " .. ply:Nick())
             end
-            ply.printer = ent -- Assign the new printer to the player
+            ply.printer = ent
+            print("[AJMRP] BuyItem: Assigned new printer to " .. ply:Nick())
         end
     else
         -- Non-entity (e.g., food): Add to inventory
+        print("[AJMRP] BuyItem: Adding " .. item_id .. " to inventory")
         ply:AddInventoryItem(item_id, 1)
     end
     
     -- Save after purchase
+    print("[AJMRP] BuyItem: Saving economy for " .. ply:Nick())
     ply:SaveEconomy()
     
+    print("[AJMRP] BuyItem: Success - Bought " .. item.name .. " for " .. item.price .. " Credits!")
     return true, "Bought " .. item.name .. " for " .. item.price .. " Credits!"
 end
 
 net.Receive("AJMRP_BuyItem", function(len, ply)
+    print("[AJMRP] Received AJMRP_BuyItem from " .. ply:Nick())
     local item_id = net.ReadString()
     local success, message = AJMRP.BuyItem(ply, item_id)
     
+    print("[AJMRP] Sending AJMRP_BuyItemResponse to " .. ply:Nick() .. ": " .. tostring(success) .. " - " .. message)
     net.Start("AJMRP_BuyItemResponse")
     net.WriteBool(success)
     net.WriteString(message)
@@ -196,6 +231,7 @@ if SERVER then
     util.AddNetworkString("AJMRP_UpdateInventory")
 
     net.Receive("AJMRP_UpdateInventory", function(len, ply)
+        print("[AJMRP] Received AJMRP_UpdateInventory from " .. ply:Nick())
         local newInventory = net.ReadTable()
         ply:SetInventory(newInventory)
         ply:SaveInventory()
