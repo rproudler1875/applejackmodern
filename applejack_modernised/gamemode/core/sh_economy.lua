@@ -9,6 +9,7 @@ function meta:GetCredits()
 end
 
 function meta:AddCredits(amount)
+    if not IsValid(self) then return end
     local current = self:GetCredits()
     self:SetNWInt("AJMRP_Credits", math.max(0, current + amount))
 end
@@ -23,6 +24,7 @@ function meta:GetInventory()
 end
 
 function meta:SetInventory(inv)
+    if not IsValid(self) then return end
     if SERVER then
         self.AJMRP_Inventory = inv or {}
         self:SetNWString("AJMRP_Inventory", util.TableToJSON(self.AJMRP_Inventory))
@@ -30,12 +32,14 @@ function meta:SetInventory(inv)
 end
 
 function meta:AddInventoryItem(item_id, amount)
+    if not IsValid(self) then return end
     local inv = self:GetInventory()
     inv[item_id] = (inv[item_id] or 0) + amount
     self:SetInventory(inv)
 end
 
 function meta:RemoveInventoryItem(item_id, amount)
+    if not IsValid(self) then return end
     local inv = self:GetInventory()
     if inv[item_id] and inv[item_id] >= amount then
         inv[item_id] = inv[item_id] - amount
