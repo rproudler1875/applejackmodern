@@ -18,4 +18,22 @@ function GM:HUDShouldDraw(name)
     return true
 end
 
+-- Open spawn menu on Q key press, close on release
+hook.Add("PlayerBindPress", "AJMRP_OpenSpawnMenu", function(ply, bind, pressed)
+    if bind == "+menu" then
+        if pressed then
+            gui.EnableScreenClicker(true) -- Show mouse cursor
+            if g_SpawnMenu and not g_SpawnMenu:IsVisible() then
+                g_SpawnMenu:Open() -- Open spawn menu
+            end
+        else
+            gui.EnableScreenClicker(false) -- Hide mouse cursor
+            if g_SpawnMenu and g_SpawnMenu:IsVisible() then
+                g_SpawnMenu:Close() -- Close spawn menu
+            end
+        end
+        return true -- Suppress default Q menu
+    end
+end)
+
 print("[AJMRP] cl_init.lua loaded")

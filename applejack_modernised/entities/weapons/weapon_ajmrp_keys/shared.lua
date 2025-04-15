@@ -1,11 +1,13 @@
 SWEP.PrintName = "Keys"
 SWEP.Author = "Grok"
+SWEP.Purpose = "To lock and unlock owned doors"
+SWEP.Instructions = "Left click: Lock door | Right click: Unlock door"
 SWEP.Category = "AppleJack Modernised RP"
 SWEP.Spawnable = true
 SWEP.AdminOnly = false
 
 SWEP.Base = "weapon_base"
-SWEP.Slot = 0
+SWEP.Slot = 1
 SWEP.SlotPos = 1
 SWEP.DrawAmmo = false
 SWEP.DrawCrosshair = true

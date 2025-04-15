@@ -29,36 +29,66 @@ util.AddNetworkString("AJMRP_AcceptTrade")
 util.AddNetworkString("AJMRP_SyncInventory")
 
 function GM:Initialize()
-    print("[AJMRP] AppleJack Modernised RP loaded!")
+ print("[AJMRP] AppleJack Modernised RP loaded!")
 end
 
 function GM:PlayerInitialSpawn(ply)
-    ply:LoadCharacter()
-    ply:LoadJob()
-    ply:LoadEconomy()
-    ply:LoadInventory()
-    ply:SetHunger(AJMRP.Config.MaxHunger)
-    ply:SetStamina(AJMRP.Config.MaxStamina)
-    ply.firstJoin = true
+ ply:LoadCharacter()
+ ply:LoadJob()
+ ply:LoadEconomy()
+ ply:LoadInventory()
+ ply:SetHunger(AJMRP.Config.MaxHunger)
+ ply:SetStamina(AJMRP.Config.MaxStamina)
+ ply.firstJoin = true
 end
 
 function GM:PlayerSpawn(ply)
-    self.BaseClass:PlayerSpawn(ply) -- Call sandbox spawn
-    ply:Give("weapon_ajmrp_keys") -- Give keys to all players
+ self.BaseClass:PlayerSpawn(ply) -- Call sandbox spawn
+ ply:Give("weapon_ajmrp_keys") -- Give keys
+ ply:Give("weapon_physgun") -- Give physics gun
 end
 
 function GM:PlayerDisconnected(ply)
-    ply:SaveCharacter()
-    ply:SaveJob()
-    ply:SaveEconomy()
-    ply:SaveInventory()
-    if IsValid(ply.printer) then
-        ply.printer:Remove()
-    end
+ ply:SaveCharacter()
+ ply:SaveJob()
+ ply:SaveEconomy()
+ ply:SaveInventory()
+ if IsValid(ply.printer) then
+ ply.printer:Remove()
+ end
+end
+
+-- Allow all players to use spawn menu
+function GM:PlayerSpawnedProp(ply, model, ent)
+ return true -- Allow prop spawning
+end
+
+function GM:PlayerSpawnedNPC(ply, ent)
+ return true -- Allow NPC spawning
+end
+
+function GM:PlayerSpawnedVehicle(ply, ent)
+ return true -- Allow vehicle spawning
+end
+
+function GM:PlayerSpawnedSENT(ply, ent)
+ return true -- Allow scripted entity spawning
+end
+
+function GM:PlayerSpawnedWeapon(ply, ent)
+ return true -- Allow weapon spawning
+end
+
+function GM:PlayerSpawnedEffect(ply, model, ent)
+ return true -- Allow effect spawning
+end
+
+function GM:PlayerSpawnedRagdoll(ply, model, ent)
+ return true -- Allow ragdoll spawning
 end
 
 concommand.Add("ajmrp_toggle_hud", function(ply)
-    if IsValid(ply) then
-        ply:ChatPrint("Use this command in client console to toggle HUD.")
-    end
+ if IsValid(ply) then
+ ply:ChatPrint("Use this command in client console to toggle HUD.")
+ end
 end)
