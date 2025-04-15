@@ -132,9 +132,9 @@ local function CreateShopTab(frame)
         weightLabel:SetSize(180, 20)
         weightLabel:SetPos(10, 140)
         weightLabel:SetText("Weight: " .. (item.weight or 0))
-        priceLabel:SetFont("DermaDefault")
-        priceLabel:SetTextColor(Color(255, 255, 255, 220))
-        priceLabel:SetContentAlignment(5)
+        weightLabel:SetFont("DermaDefault")
+        weightLabel:SetTextColor(Color(255, 255, 255, 220))
+        weightLabel:SetContentAlignment(5)
 
         -- Buy Button
         local buyButton = vgui.Create("DButton", itemPanel)
@@ -250,10 +250,10 @@ local function CreateInventoryTab(frame)
     slotsLabel:SetSize(200, 20)
     slotsLabel:SetPos(220, 10)
     slotsLabel:SetText("Slots: " .. slotCount .. "/" .. maxSlots)
-    slotsLabel:SetFont("DermaDefault")
-    slotsLabel:SetTextColor(Color(255, 255, 255, 220))
+    weightLabel:SetFont("DermaDefault")
+    weightLabel:SetTextColor(Color(255, 255, 255, 220))
 
-    -- Grid for inventory items
+    -- Grid for inventory items using DIconLayout
     local gridPanel = vgui.Create("DPanel", inventoryPanel)
     gridPanel:SetSize(500, 500)
     gridPanel:SetPos(10, 40)
@@ -261,11 +261,12 @@ local function CreateInventoryTab(frame)
         draw.RoundedBox(4, 0, 0, w, h, Color(30, 30, 30, 200))
     end
 
-    local grid = vgui.Create("DGrid", gridPanel)
-    grid:SetPos(10, 10)
-    grid:SetCols(5)
-    grid:SetColWide(90)
-    grid:SetRowHeight(90)
+    local layout = vgui.Create("DIconLayout", gridPanel)
+    layout:SetSize(470, 470) -- Slightly smaller to fit inside gridPanel with padding
+    layout:SetPos(15, 15)
+    layout:SetSpaceX(10)
+    layout:SetSpaceY(10)
+    layout:MakeDroppable("AJMRP_Inventory") -- Enable drag-and-drop
 
     -- Inventory slots (stored as a list for drag-and-drop)
     local slots = {}
@@ -278,7 +279,11 @@ local function CreateInventoryTab(frame)
         slot.Paint = function(self, w, h)
             draw.RoundedBox(4, 0, 0, w, h, Color(50, 50, 50, 200))
         end
-        slot:SetDropPos("5") -- Center drop position for drag-and-drop
+        slot.slotIndex = i
+        slots[i] = slot
+        layout:Add(slot)
+
+        -- Allow dropping on the slot
         slot.OnDrop = function(self, draggedPanel)
             local draggedSlotIndex = draggedPanel.slotIndex
             local targetSlotIndex = self.slotIndex
@@ -347,9 +352,6 @@ local function CreateInventoryTab(frame)
             net.WriteTable(newInventory)
             net.SendToServer()
         end
-        slot.slotIndex = i
-        slots[i] = slot
-        grid:AddItem(slot)
     end
 
     -- Populate the grid with items from the player's inventory
