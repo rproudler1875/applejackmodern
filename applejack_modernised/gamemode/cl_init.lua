@@ -18,18 +18,34 @@ function GM:HUDShouldDraw(name)
     return true
 end
 
+-- Ensure spawn menu is initialized
+hook.Add("PostGamemodeLoaded", "AJMRP_InitSpawnMenu", function()
+    print("[AJMRP] PostGamemodeLoaded: Checking g_SpawnMenu")
+    if g_SpawnMenu then
+        print("[AJMRP] g_SpawnMenu is available")
+    else
+        print("[AJMRP] WARNING: g_SpawnMenu is nil")
+    end
+end)
+
 -- Open spawn menu on Q key press, close on release
 hook.Add("PlayerBindPress", "AJMRP_OpenSpawnMenu", function(ply, bind, pressed)
     if bind == "+menu" then
+        print("[AJMRP] PlayerBindPress: +menu, pressed = " .. tostring(pressed))
         if pressed then
             gui.EnableScreenClicker(true) -- Show mouse cursor
-            if g_SpawnMenu and not g_SpawnMenu:IsVisible() then
-                g_SpawnMenu:Open() -- Open spawn menu
+            if g_SpawnMenu then
+                print("[AJMRP] Opening spawn menu")
+                g_SpawnMenu:Open()
+            else
+                print("[AJMRP] g_SpawnMenu is nil, trying spawnmenu.Activate()")
+                spawnmenu.Activate()
             end
         else
             gui.EnableScreenClicker(false) -- Hide mouse cursor
-            if g_SpawnMenu and g_SpawnMenu:IsVisible() then
-                g_SpawnMenu:Close() -- Close spawn menu
+            if g_SpawnMenu then
+                print("[AJMRP] Closing spawn menu")
+                g_SpawnMenu:Close()
             end
         end
         return true -- Suppress default Q menu
