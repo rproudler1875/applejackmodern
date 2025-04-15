@@ -28,22 +28,67 @@ function GM:SpawnMenuOpen()
     return true
 end
 
+-- Initialize spawn menu
+local function InitializeSpawnMenu()
+    if not g_SpawnMenu then
+        print("[AJMRP] Attempting to create g_SpawnMenu")
+        -- Check if SpawnMenu VGUI is registered
+        if vgui.GetControlList() and vgui.GetControlList()["SpawnMenu"] then
+            g_SpawnMenu = vgui.Create("SpawnMenu")
+            if IsValid(g_SpawnMenu) then
+                print("[AJMRP] g_SpawnMenu created successfully")
+                -- Populate with sandbox tabs
+                if spawnmenu then
+                    spawnmenu.PopulateFromEngine()
+                    spawnmenu.PopulateFromGamemode()
+                    g_SpawnMenu:SetSkin(GAMEMODE.Config.DarkRPSkin or "Default")
+                else
+                    print("[AJMRP] WARNING: spawnmenu module unavailable")
+                end
+            else
+                print("[AJMRP] ERROR: Failed to create g_SpawnMenu")
+            end
+        else
+            print("[AJMRP] ERROR: SpawnMenu VGUI not registered")
+        end
+    end
+    return g_SpawnMenu
+end
+
 -- Debug spawn menu initialization
-hook.Add("PostGamemodeLoaded", "AJMRP_InitSpawnMenu", function()
-    print("[AJMRP] PostGamemodeLoaded: Checking spawn menu")
+hook.Add("InitPostEntity", "AJMRP_InitSpawnMenu", function()
+    print("[AJMRP] InitPostEntity: Checking spawn menu")
     print("[AJMRP] Gamemode: " .. (gmod.GetGamemode() and gmod.GetGamemode().Name or "Unknown"))
-    if g_SpawnMenu then
-        print("[AJMRP] g_SpawnMenu exists")
+    print("[AJMRP] BaseClass: " .. (gmod.GetGamemode() and gmod.GetGamemode().BaseClass and gmod.GetGamemode().BaseClass.Name or "None"))
+    if spawnmenu then
+        print("[AJMRP] spawnmenu module exists")
     else
-        print("[AJMRP] g_SpawnMenu is nil")
-        -- Attempt to initialize
-        RunConsoleCommand("gmod_spawnmenu")
+        print("[AJMRP] spawnmenu module is nil")
     end
-    if g_ContextMenu then
-        print("[AJMRP] g_ContextMenu exists")
+    if vgui.GetControlList() and vgui.GetControlList()["SpawnMenu"] then
+        print("[AJMRP] SpawnMenu VGUI is registered")
     else
-        print("[AJMRP] g_ContextMenu is nil")
+        print("[AJMRP] SpawnMenu VGUI is not registered")
     end
+    -- Force sandbox initialization
+    if gmod.GetGamemode().BaseClass then
+        print("[AJMRP] Calling sandbox PostGamemodeLoaded")
+        hook.Call("PostGamemodeLoaded", gmod.GetGamemode().BaseClass)
+    end
+    -- Delay initialization to ensure VGUI registration
+    timer.Simple(2, function()
+        if not g_SpawnMenu then
+            print("[AJMRP] g_SpawnMenu is nil, initializing")
+            InitializeSpawnMenu()
+            if g_SpawnMenu then
+                print("[AJMRP] g_SpawnMenu initialized in delayed hook")
+            else
+                print("[AJMRP] ERROR: g_SpawnMenu still nil after delay")
+            end
+        else
+            print("[AJMRP] g_SpawnMenu already exists")
+        end
+    end)
 end)
 
 -- Open spawn menu on Q key press, close on release
@@ -53,23 +98,15 @@ hook.Add("PlayerBindPress", "AJMRP_OpenSpawnMenu", function(ply, bind, pressed)
         if pressed then
             gui.EnableScreenClicker(true) -- Show mouse cursor
             if not g_SpawnMenu then
-                print("[AJMRP] g_SpawnMenu is nil, attempting to initialize")
-                RunConsoleCommand("gmod_spawnmenu") -- Try to force initialization
-                -- Delay to allow initialization
-                timer.Simple(0.1, function()
-                    if g_SpawnMenu then
-                        print("[AJMRP] g_SpawnMenu initialized, opening")
-                        g_SpawnMenu:Open()
-                    else
-                        print("[AJMRP] Fallback: Opening g_ContextMenu")
-                        if g_ContextMenu then
-                            g_ContextMenu:Open()
-                        else
-                            print("[AJMRP] ERROR: Both g_SpawnMenu and g_ContextMenu are nil, opening game UI")
-                            gui.ActivateGameUI() -- Last resort
-                        end
-                    end
-                end)
+                print("[AJMRP] g_SpawnMenu is nil, initializing")
+                InitializeSpawnMenu()
+                if g_SpawnMenu then
+                    print("[AJMRP] g_SpawnMenu initialized, opening")
+                    g_SpawnMenu:Open()
+                else
+                    print("[AJMRP] ERROR: g_SpawnMenu still nil")
+                    LocalPlayer():ChatPrint("Failed to open spawn menu. Admins: Run 'lua_run_cl if vgui.GetControlList()[\"SpawnMenu\"] then vgui.Create(\"SpawnMenu\"):Open() else print(\"SpawnMenu not registered\") end' in console.")
+                end
             else
                 print("[AJMRP] Opening g_SpawnMenu")
                 g_SpawnMenu:Open()
@@ -79,9 +116,6 @@ hook.Add("PlayerBindPress", "AJMRP_OpenSpawnMenu", function(ply, bind, pressed)
             if g_SpawnMenu and g_SpawnMenu:IsVisible() then
                 print("[AJMRP] Closing g_SpawnMenu")
                 g_SpawnMenu:Close()
-            elseif g_ContextMenu and g_ContextMenu:IsVisible() then
-                print("[AJMRP] Closing g_ContextMenu")
-                g_ContextMenu:Close()
             end
         end
         return true -- Suppress default context menu

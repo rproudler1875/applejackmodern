@@ -30,7 +30,7 @@ util.AddNetworkString("AJMRP_SyncInventory")
 
 function GM:Initialize()
     print("[AJMRP] AppleJack Modernised RP loaded!")
-    spawnmenu.Init() -- Initialize spawn menu system
+    -- Removed spawnmenu.Init() as it's client-only
 end
 
 function GM:PlayerInitialSpawn(ply)
