@@ -221,26 +221,28 @@ concommand.Add("ajmrp_menu", function()
     CreateMainMenu()
 end)
 
--- Bind to F2 using ShowSpare1 (default F2 key binding should be gm_showspare1)
-hook.Add("ShowSpare1", "AJMRP_OpenMenu", function()
-    print("[AJMRP] ShowSpare1 hook triggered (F2 pressed)")
+-- Bind to F2 using ShowTeam (since F2 is bound to gm_showteam)
+hook.Add("ShowTeam", "AJMRP_OpenMenu", function()
+    print("[AJMRP] ShowTeam hook triggered (F2 pressed)")
+    LocalPlayer():ChatPrint("F2 pressed! Opening menu...")
     CreateMainMenu()
-end)
+end, 100) -- Higher priority
 
--- Command to rebind F2 to gm_showspare1 if needed
-concommand.Add("ajmrp_bind_f2", function()
-    if not IsValid(LocalPlayer()) then
-        print("[AJMRP] Cannot bind F2: LocalPlayer not valid")
-        return
-    end
-    LocalPlayer():ConCommand("bind f2 gm_showspare1")
-    print("[AJMRP] F2 key bound to gm_showspare1. Press F2 to open the menu.")
-end)
-
+-- Removed ajmrp_bind_f2 since bind command is blocked
 -- Notify player on spawn
 hook.Add("InitPostEntity", "AJMRP_NotifyMenuKey", function()
     if not IsValid(LocalPlayer()) then return end
-    LocalPlayer():ChatPrint("Press F2 to open the AJMRP menu! If F2 doesn't work, type 'ajmrp_bind_f2' in the console to rebind it.")
+    LocalPlayer():ChatPrint("Press F2 to open the AJMRP menu!")
+end)
+
+-- Debug: Check if ShowTeam hook is registered
+hook.Add("InitPostEntity", "AJMRP_DebugShowTeam", function()
+    local hooks = hook.GetTable()
+    if hooks.ShowTeam and hooks.ShowTeam.AJMRP_OpenMenu then
+        print("[AJMRP] ShowTeam hook for AJMRP_OpenMenu is registered")
+    else
+        print("[AJMRP] WARNING: ShowTeam hook for AJMRP_OpenMenu is NOT registered")
+    end
 end)
 
 print("[AJMRP] cl_menu.lua loaded successfully")
