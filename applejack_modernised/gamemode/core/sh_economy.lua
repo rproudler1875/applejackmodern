@@ -118,12 +118,12 @@ function AJMRP.BuyItem(ply, item_id)
     end
     
     if not allowed then
-        return false, "Cannot buy " .. item.name .. ": Restricted to specific jobs!"
+        return false, "Cannot buy " .. item.name .. ": Restricted to " .. table.concat(item.jobs, ", ") .. "!"
     end
     
     local credits = ply:GetCredits()
     if credits < item.price then
-        return false, "Cannot buy " .. item.name .. ": Not enough Credits!"
+        return false, "Cannot buy " .. item.name .. ": Need " .. item.price .. " Credits, you have " .. credits .. "!"
     end
     
     -- Deduct Credits
@@ -150,12 +150,27 @@ function AJMRP.BuyItem(ply, item_id)
         local ent = ents.Create(item.entity)
         if not IsValid(ent) then
             ply:AddCredits(item.price) -- Refund
-            return false, "Failed to spawn " .. item.name .. ": Invalid entity!"
+            return false, "Failed to spawn " .. item.name .. ": Entity '" .. item.entity .. "' could not be created!"
         end
         
         ent:SetPos(spawnPos)
+        -- Set the owner for entities like the money printer
+        if ent.SetOwner then
+            ent:SetOwner(ply)
+        elseif ent.Setowning_ent then -- Fallback for some entities
+            ent:Setowning_ent(ply)
+        end
+        ent.owner = ply -- Directly set the owner field as per ajmrp_printer/init.lua
         ent:Spawn()
         ent:DropToFloor()
+        
+        -- Special handling for money printer
+        if item.entity == "ajmrp_printer" then
+            if IsValid(ply.printer) then
+                ply.printer:Remove() -- Remove existing printer if any
+            end
+            ply.printer = ent -- Assign the new printer to the player
+        end
     else
         -- Non-entity (e.g., food): Add to inventory
         ply:AddInventoryItem(item_id, 1)
