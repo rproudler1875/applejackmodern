@@ -23,4 +23,16 @@ for _, ent in ipairs(entities) do
     }, ent)
 end
 
+-- Register the keys weapon
+print("[AJMRP] Registering weapon: weapon_ajmrp_keys")
+weapons.Register({
+    Base = "weapon_base",
+    PrintName = "Keys",
+    Author = "Grok",
+    Category = "AppleJack Modernised RP",
+    Spawnable = true,
+    AdminOnly = false
+}, "weapon_ajmrp_keys")
+
 print("[AJMRP] ajmrp_printer handled by shared.lua and ajmrp_printer_fix.lua")
+print("[AJMRP] ajmrp_entities.lua loaded")
