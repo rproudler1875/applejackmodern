@@ -3,15 +3,60 @@ AJMRP.Config = AJMRP.Config or {}
 
 -- Define Jobs table for HUD and other systems
 AJMRP.Config.Jobs = {
-    ["citizen"] = { name = "Citizen", xpThresholds = { 1000, 2000, 3000 } },
-    ["police"] = { name = "Police", xpThresholds = { 1500, 2500, 3500 } },
-    ["gangster"] = { name = "Gangster", xpThresholds = { 1200, 2200, 3200 } },
-    ["shopkeeper"] = { name = "Shopkeeper", xpThresholds = { 1000, 2000, 3000 } },
-    ["mayor"] = { name = "Mayor", xpThresholds = { 2000, 3000, 4000 } },
-    ["paramedic"] = { name = "Paramedic", xpThresholds = { 1000, 2000, 3000 } },
-    ["hacker"] = { name = "Hacker", xpThresholds = { 1200, 2200, 3200 } },
-    ["driver"] = { name = "Delivery Driver", xpThresholds = { 1000, 2000, 3000 } },
-    ["vigilante"] = { name = "Vigilante", xpThresholds = { 1200, 2200, 3200 } },
+    ["citizen"] = { 
+        name = "Citizen", 
+        description = "A regular city dweller trying to make a living.",
+        salary = 100,
+        xpThresholds = { 1000, 2000, 3000 } 
+    },
+    ["police"] = { 
+        name = "Police", 
+        description = "Enforce the law and keep the city safe.",
+        salary = 150,
+        xpThresholds = { 1500, 2500, 3500 } 
+    },
+    ["gangster"] = { 
+        name = "Gangster", 
+        description = "Engage in illegal activities to earn quick credits.",
+        salary = 120,
+        xpThresholds = { 1200, 2200, 3200 } 
+    },
+    ["shopkeeper"] = { 
+        name = "Shopkeeper", 
+        description = "Run a store and sell goods to players.",
+        salary = 130,
+        xpThresholds = { 1000, 2000, 3000 } 
+    },
+    ["mayor"] = { 
+        name = "Mayor", 
+        description = "Lead the city and make important decisions.",
+        salary = 200,
+        xpThresholds = { 2000, 3000, 4000 } 
+    },
+    ["paramedic"] = { 
+        name = "Paramedic", 
+        description = "Heal injured players and save lives.",
+        salary = 140,
+        xpThresholds = { 1000, 2000, 3000 } 
+    },
+    ["hacker"] = { 
+        name = "Hacker", 
+        description = "Use tech skills for illicit gains.",
+        salary = 130,
+        xpThresholds = { 1200, 2200, 3200 } 
+    },
+    ["driver"] = { 
+        name = "Delivery Driver", 
+        description = "Deliver goods across the city.",
+        salary = 110,
+        xpThresholds = { 1000, 2000, 3000 } 
+    },
+    ["vigilante"] = { 
+        name = "Vigilante", 
+        description = "Fight crime outside the law.",
+        salary = 120,
+        xpThresholds = { 1200, 2200, 3200 } 
+    },
 }
 
 -- Economy Items with descriptions
