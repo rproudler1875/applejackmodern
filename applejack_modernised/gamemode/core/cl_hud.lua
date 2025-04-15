@@ -21,13 +21,14 @@ hook.Add("HUDPaint", "AJMRP_HUD", function()
     local stamina = ply:GetStamina()
     local health = ply:Health()
     local name = ply:GetCharacterName() or ply:Nick()
-    local job = AJMRP.Config.Jobs[ply:GetJob()] and AJMRP.Config.Jobs[ply:GetJob()].name or "Unknown"
+    -- Fix line 24: Safely access Jobs with a fallback
+    local job = AJMRP.Config.Jobs and AJMRP.Config.Jobs[ply:GetJob()] and AJMRP.Config.Jobs[ply:GetJob()].name or "Unknown"
     
     local x, y = ScrW() / 2 - 225, ScrH() - 90
     local width, height = 450, 90
     
-    -- Transparent dark gray background
-    draw.RoundedBox(8, x, y, width, height, Color(50, 50, 50, 180))
+    -- Use AJMRP.Config.HUDColor for background
+    draw.RoundedBox(8, x, y, width, height, AJMRP.Config.HUDColor or Color(50, 50, 50, 180))
     
     -- Left: Name, Job, Credits
     draw.SimpleText("Character: " .. name, "AJMRP_HUD_Title", x + 10, y + 10, Color(255, 255, 255, 220), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
@@ -67,12 +68,12 @@ concommand.Add("ajmrp_toggle_hud", function(ply)
             local stamina = ply:GetStamina()
             local health = ply:Health()
             local name = ply:GetCharacterName() or ply:Nick()
-            local job = AJMRP.Config.Jobs[ply:GetJob()] and AJMRP.Config.Jobs[ply:GetJob()].name or "Unknown"
+            local job = AJMRP.Config.Jobs and AJMRP.Config.Jobs[ply:GetJob()] and AJMRP.Config.Jobs[ply:GetJob()].name or "Unknown"
             
             local x, y = ScrW() / 2 - 225, ScrH() - 90
             local width, height = 450, 90
             
-            draw.RoundedBox(8, x, y, width, height, Color(50, 50, 50, 180))
+            draw.RoundedBox(8, x, y, width, height, AJMRP.Config.HUDColor or Color(50, 50, 50, 180))
             
             draw.SimpleText("Character: " .. name, "AJMRP_HUD_Title", x + 10, y + 10, Color(255, 255, 255, 220), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
             draw.SimpleText("Job: " .. job, "AJMRP_HUD_Text", x + 10, y + 30, Color(255, 255, 255, 220), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
