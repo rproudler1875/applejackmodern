@@ -42,6 +42,11 @@ function GM:PlayerInitialSpawn(ply)
     ply.firstJoin = true
 end
 
+function GM:PlayerSpawn(ply)
+    self.BaseClass:PlayerSpawn(ply) -- Call sandbox spawn
+    ply:Give("weapon_ajmrp_keys") -- Give keys to all players
+end
+
 function GM:PlayerDisconnected(ply)
     ply:SaveCharacter()
     ply:SaveJob()
