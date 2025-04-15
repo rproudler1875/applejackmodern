@@ -18,13 +18,26 @@ function GM:HUDShouldDraw(name)
     return true
 end
 
+-- Ensure spawn menu is enabled
+function GM:SpawnMenuEnabled()
+    return true
+end
+
+-- Allow all players to open the spawn menu
+function GM:SpawnMenuOpen()
+    return true
+end
+
 -- Debug spawn menu initialization
 hook.Add("PostGamemodeLoaded", "AJMRP_InitSpawnMenu", function()
     print("[AJMRP] PostGamemodeLoaded: Checking spawn menu")
+    print("[AJMRP] Gamemode: " .. (gmod.GetGamemode() and gmod.GetGamemode().Name or "Unknown"))
     if g_SpawnMenu then
         print("[AJMRP] g_SpawnMenu exists")
     else
         print("[AJMRP] g_SpawnMenu is nil")
+        -- Attempt to initialize
+        RunConsoleCommand("gmod_spawnmenu")
     end
     if g_ContextMenu then
         print("[AJMRP] g_ContextMenu exists")
@@ -40,19 +53,26 @@ hook.Add("PlayerBindPress", "AJMRP_OpenSpawnMenu", function(ply, bind, pressed)
         if pressed then
             gui.EnableScreenClicker(true) -- Show mouse cursor
             if not g_SpawnMenu then
-                print("[AJMRP] g_SpawnMenu is nil, initializing")
-                CreateSpawnMenu() -- Create spawn menu if not initialized
-            end
-            if g_SpawnMenu then
+                print("[AJMRP] g_SpawnMenu is nil, attempting to initialize")
+                RunConsoleCommand("gmod_spawnmenu") -- Try to force initialization
+                -- Delay to allow initialization
+                timer.Simple(0.1, function()
+                    if g_SpawnMenu then
+                        print("[AJMRP] g_SpawnMenu initialized, opening")
+                        g_SpawnMenu:Open()
+                    else
+                        print("[AJMRP] Fallback: Opening g_ContextMenu")
+                        if g_ContextMenu then
+                            g_ContextMenu:Open()
+                        else
+                            print("[AJMRP] ERROR: Both g_SpawnMenu and g_ContextMenu are nil, opening game UI")
+                            gui.ActivateGameUI() -- Last resort
+                        end
+                    end
+                end)
+            else
                 print("[AJMRP] Opening g_SpawnMenu")
                 g_SpawnMenu:Open()
-            else
-                print("[AJMRP] Fallback: Opening g_ContextMenu")
-                if g_ContextMenu then
-                    g_ContextMenu:Open()
-                else
-                    print("[AJMRP] ERROR: Both g_SpawnMenu and g_ContextMenu are nil")
-                end
             end
         else
             gui.EnableScreenClicker(false) -- Hide mouse cursor
