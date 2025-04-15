@@ -132,9 +132,9 @@ local function CreateShopTab(frame)
         weightLabel:SetSize(180, 20)
         weightLabel:SetPos(10, 140)
         weightLabel:SetText("Weight: " .. (item.weight or 0))
-        weightLabel:SetFont("DermaDefault")
-        weightLabel:SetTextColor(Color(255, 255, 255, 220))
-        weightLabel:SetContentAlignment(5)
+        priceLabel:SetFont("DermaDefault")
+        priceLabel:SetTextColor(Color(255, 255, 255, 220))
+        priceLabel:SetContentAlignment(5)
 
         -- Buy Button
         local buyButton = vgui.Create("DButton", itemPanel)
@@ -211,7 +211,7 @@ local function CreateInventoryTab(frame)
         return
     end
     if not AJMRP.Config then
-        print("[AJMRP] CreateInventory                                                                                Tab: AJMRP.Config not loaded")
+        print("[AJMRP] CreateInventoryTab: AJMRP.Config not loaded")
         return
     end
 
