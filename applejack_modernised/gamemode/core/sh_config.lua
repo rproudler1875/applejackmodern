@@ -1,6 +1,19 @@
 AJMRP = AJMRP or {}
 AJMRP.Config = AJMRP.Config or {}
 
+-- Define Jobs table for HUD and other systems
+AJMRP.Config.Jobs = {
+    ["citizen"] = { name = "Citizen", xpThresholds = { 1000, 2000, 3000 } },
+    ["police"] = { name = "Police", xpThresholds = { 1500, 2500, 3500 } },
+    ["gangster"] = { name = "Gangster", xpThresholds = { 1200, 2200, 3200 } },
+    ["shopkeeper"] = { name = "Shopkeeper", xpThresholds = { 1000, 2000, 3000 } },
+    ["mayor"] = { name = "Mayor", xpThresholds = { 2000, 3000, 4000 } },
+    ["paramedic"] = { name = "Paramedic", xpThresholds = { 1000, 2000, 3000 } },
+    ["hacker"] = { name = "Hacker", xpThresholds = { 1200, 2200, 3200 } },
+    ["driver"] = { name = "Delivery Driver", xpThresholds = { 1000, 2000, 3000 } },
+    ["vigilante"] = { name = "Vigilante", xpThresholds = { 1200, 2200, 3200 } },
+}
+
 -- Economy Items
 AJMRP.Config.Items = {
     pistol = {
@@ -44,6 +57,8 @@ AJMRP.Config.MaxStamina = 100
 AJMRP.Config.StaminaDrain = 0.25 -- per second while sprinting
 AJMRP.Config.StaminaRegen = 0.5 -- per second while standing still
 AJMRP.Config.StaminaRegenMoving = 0.2 -- per second while moving (not sprinting)
+AJMRP.Config.StaminaRegenDelay = 1 -- Delay before stamina regenerates (in seconds)
+AJMRP.Config.StaminaJumpCost = 5 -- Stamina cost per jump
 
 -- Hunger Config
 AJMRP.Config.MaxHunger = 100
