@@ -16,9 +16,14 @@ function meta:AddHunger(amount)
 end
 
 if SERVER then
+    -- Initialize hunger on spawn
+    hook.Add("PlayerInitialSpawn", "AJMRP_HungerInit", function(ply)
+        ply:SetHunger(AJMRP.Config.MaxHunger)
+    end)
+
     timer.Create("AJMRP_HungerDrain", 1, 0, function()
         for _, ply in ipairs(player.GetAll()) do
-            if not IsValid(ply) then continue end
+            if not IsValid(ply) or not ply:Alive() then continue end -- Fix line 16
             
             local hunger = ply:GetHunger()
             if hunger <= 0 then
