@@ -1,6 +1,16 @@
+-- Ensure AJMRP table exists
+AJMRP = AJMRP or {}
+
+-- Character Tab: Displays name, job, credits, and job XP
 local function CreateCharacterTab(frame)
-    if not IsValid(LocalPlayer()) then return end
-    if not AJMRP.Config then return end
+    if not IsValid(LocalPlayer()) then
+        print("[AJMRP] CreateCharacterTab: LocalPlayer not valid")
+        return
+    end
+    if not AJMRP.Config then
+        print("[AJMRP] CreateCharacterTab: AJMRP.Config not loaded")
+        return
+    end
 
     local charPanel = vgui.Create("DPanel", frame)
     charPanel:SetSize(frame:GetWide() - 20, frame:GetTall() - 20)
@@ -8,67 +18,54 @@ local function CreateCharacterTab(frame)
     charPanel.Paint = function(self, w, h)
         draw.RoundedBox(8, 0, 0, w, h, Color(50, 50, 50, 220))
     end
-    
-    local name = vgui.Create("DLabel", charPanel)
-    name:SetSize(200, 20)
-    name:SetPos(10, 10)
-    name:SetText("Name: " .. (LocalPlayer():GetCharacterName() or LocalPlayer():Nick()))
-    name:SetFont("AJMRP_HUD_Text")
-    name:SetTextColor(Color(255, 255, 255, 220))
-    
-    local job = vgui.Create("DLabel", charPanel)
-    job:SetSize(200, 20)
-    job:SetPos(10, 30)
-    job:SetText("Job: " .. (AJMRP.Config.Jobs[LocalPlayer():GetJob()] and AJMRP.Config.Jobs[LocalPlayer():GetJob()].name or "Unknown"))
-    job:SetFont("AJMRP_HUD_Text")
-    job:SetTextColor(Color(255, 255, 255, 220))
-    
-    local stamina = vgui.Create("DLabel", charPanel)
-    stamina:SetSize(200, 20)
-    stamina:SetPos(10, 50)
-    stamina:SetText("Stamina: " .. math.floor(LocalPlayer():GetStamina() or 0) .. "%")
-    stamina:SetFont("AJMRP_HUD_Text")
-    stamina:SetTextColor(Color(255, 255, 255, 220))
-    
-    local hunger = vgui.Create("DLabel", charPanel)
-    hunger:SetSize(200, 20)
-    hunger:SetPos(10, 70)
-    hunger:SetText("Hunger: " .. math.floor(LocalPlayer():GetHunger() or 0) .. "%")
-    stamina:SetFont("AJMRP_HUD_Text")
-    stamina:SetTextColor(Color(255, 255, 255, 220))
-    
-    local health = vgui.Create("DLabel", charPanel)
-    health:SetSize(200, 20)
-    health:SetPos(10, 90)
-    health:SetText("Health: " .. (LocalPlayer():Health() or 0) .. "%")
-    health:SetFont("AJMRP_HUD_Text")
-    health:SetTextColor(Color(255, 255, 255, 220))
-    
+
+    -- Player Name
+    local nameLabel = vgui.Create("DLabel", charPanel)
+    nameLabel:SetSize(300, 20)
+    nameLabel:SetPos(10, 10)
+    nameLabel:SetText("Name: " .. (LocalPlayer():GetCharacterName() or LocalPlayer():Nick()))
+    nameLabel:SetFont("DermaDefault")
+    nameLabel:SetTextColor(Color(255, 255, 255, 220))
+
+    -- Current Job
+    local jobLabel = vgui.Create("DLabel", charPanel)
+    jobLabel:SetSize(300, 20)
+    jobLabel:SetPos(10, 40)
+    local job = LocalPlayer():GetJob() or "citizen"
+    local jobName = (AJMRP.Config.Jobs[job] and AJMRP.Config.Jobs[job].name) or "Unknown"
+    jobLabel:SetText("Job: " .. jobName)
+    jobLabel:SetFont("DermaDefault")
+    jobLabel:SetTextColor(Color(255, 255, 255, 220))
+
+    -- Credits
+    local creditsLabel = vgui.Create("DLabel", charPanel)
+    creditsLabel:SetSize(300, 20)
+    creditsLabel:SetPos(10, 70)
+    creditsLabel:SetText("Credits: " .. (LocalPlayer():GetCredits() or 0))
+    creditsLabel:SetFont("DermaDefault")
+    creditsLabel:SetTextColor(Color(255, 255, 255, 220))
+
+    -- Job XP
+    local xpLabel = vgui.Create("DLabel", charPanel)
+    xpLabel:SetSize(300, 20)
+    xpLabel:SetPos(10, 100)
+    xpLabel:SetText("Job XP: " .. (LocalPlayer():GetJobXP() or 0))
+    xpLabel:SetFont("DermaDefault")
+    xpLabel:SetTextColor(Color(255, 255, 255, 220))
+
     return charPanel
 end
 
-local function CreateDoorsTab(frame)
-    local doorsPanel = vgui.Create("DPanel", frame)
-    doorsPanel:SetSize(frame:GetWide() - 20, frame:GetTall() - 20)
-    doorsPanel:SetPos(10, 10)
-    doorsPanel.Paint = function(self, w, h)
-        draw.RoundedBox(8, 0, 0, w, h, Color(50, 50, 50, 220))
-    end
-    
-    local list = vgui.Create("DListView", doorsPanel)
-    list:SetSize(doorsPanel:GetWide() - 20, doorsPanel:GetTall() - 20)
-    list:SetPos(10, 10)
-    list:AddColumn("Door")
-    list:AddColumn("Status")
-    
-    list:AddLine("Front Door", "Owned")
-    list:AddLine("Back Door", "Unowned")
-    
-    return doorsPanel
-end
-
+-- Shop Tab: Lists items with name, description, price, weight, and buy button
 local function CreateShopTab(frame)
-    if not AJMRP.Config then return end
+    if not IsValid(LocalPlayer()) then
+        print("[AJMRP] CreateShopTab: LocalPlayer not valid")
+        return
+    end
+    if not AJMRP.Config then
+        print("[AJMRP] CreateShopTab: AJMRP.Config not loaded")
+        return
+    end
 
     local shopPanel = vgui.Create("DPanel", frame)
     shopPanel:SetSize(frame:GetWide() - 20, frame:GetTall() - 20)
@@ -76,17 +73,17 @@ local function CreateShopTab(frame)
     shopPanel.Paint = function(self, w, h)
         draw.RoundedBox(8, 0, 0, w, h, Color(50, 50, 50, 220))
     end
-    
+
     local scroll = vgui.Create("DScrollPanel", shopPanel)
     scroll:SetSize(shopPanel:GetWide() - 20, shopPanel:GetTall() - 20)
     scroll:SetPos(10, 10)
-    
+
     local layout = vgui.Create("DIconLayout", scroll)
     layout:SetSize(scroll:GetWide(), scroll:GetTall())
     layout:SetPos(0, 0)
     layout:SetSpaceX(10)
     layout:SetSpaceY(10)
-    
+
     for id, item in pairs(AJMRP.Config.Items or {}) do
         local allowed = false
         for _, job in ipairs(item.jobs or {}) do
@@ -95,71 +92,86 @@ local function CreateShopTab(frame)
                 break
             end
         end
-        
+
         local itemPanel = layout:Add("DPanel")
-        itemPanel:SetSize(150, 200)
+        itemPanel:SetSize(200, 250)
         itemPanel.Paint = function(self, w, h)
             draw.RoundedBox(4, 0, 0, w, h, Color(30, 30, 30, 200))
         end
-        
-        local icon = vgui.Create("DImage", itemPanel)
-        icon:SetSize(64, 64)
-        icon:SetPos(43, 10)
-        icon:SetImage(item.icon or "icon16/error.png")
-        
-        local name = vgui.Create("DLabel", itemPanel)
-        name:SetSize(140, 20)
-        name:SetPos(5, 80)
-        name:SetText(item.name or "Unknown Item")
-        name:SetFont("AJMRP_HUD_Text")
-        name:SetTextColor(Color(255, 255, 255, 220))
-        name:SetContentAlignment(5)
-        
-        local price = vgui.Create("DLabel", itemPanel)
-        price:SetSize(140, 20)
-        price:SetPos(5, 100)
-        price:SetText("Price: " .. (item.price or 0) .. " Credits")
-        name:SetFont("AJMRP_HUD_Text")
-        name:SetTextColor(Color(255, 255, 255, 220))
-        name:SetContentAlignment(5)
-        
-        local weight = vgui.Create("DLabel", itemPanel)
-        weight:SetSize(140, 20)
-        weight:SetPos(5, 120)
-        weight:SetText("Weight: " .. (item.weight or 0))
-        name:SetFont("AJMRP_HUD_Text")
-        name:SetTextColor(Color(255, 255, 255, 220))
-        name:SetContentAlignment(5)
-        
-        local buy = vgui.Create("DButton", itemPanel)
-        buy:SetSize(100, 30)
-        buy:SetPos(25, 150)
-        buy:SetText("Buy")
-        buy:SetFont("AJMRP_HUD_Text")
-        buy:SetTextColor(Color(255, 255, 255, 220))
-        buy.Paint = function(self, w, h)
+
+        -- Item Name
+        local nameLabel = vgui.Create("DLabel", itemPanel)
+        nameLabel:SetSize(180, 20)
+        nameLabel:SetPos(10, 10)
+        nameLabel:SetText(item.name or "Unknown Item")
+        nameLabel:SetFont("DermaDefault")
+        nameLabel:SetTextColor(Color(255, 255, 255, 220))
+        nameLabel:SetContentAlignment(5)
+
+        -- Description
+        local descLabel = vgui.Create("DLabel", itemPanel)
+        descLabel:SetSize(180, 60)
+        descLabel:SetPos(10, 40)
+        descLabel:SetText(item.description or "A useful item for your roleplay adventures.")
+        descLabel:SetFont("DermaDefault")
+        descLabel:SetTextColor(Color(255, 255, 255, 220))
+        descLabel:SetWrap(true)
+        descLabel:SetContentAlignment(5)
+
+        -- Price
+        local priceLabel = vgui.Create("DLabel", itemPanel)
+        priceLabel:SetSize(180, 20)
+        priceLabel:SetPos(10, 110)
+        priceLabel:SetText("Price: " .. (item.price or 0) .. " Credits")
+        priceLabel:SetFont("DermaDefault")
+        priceLabel:SetTextColor(Color(255, 255, 255, 220))
+        priceLabel:SetContentAlignment(5)
+
+        -- Weight
+        local weightLabel = vgui.Create("DLabel", itemPanel)
+        weightLabel:SetSize(180, 20)
+        weightLabel:SetPos(10, 140)
+        weightLabel:SetText("Weight: " .. (item.weight or 0))
+        weightLabel:SetFont("DermaDefault")
+        weightLabel:SetTextColor(Color(255, 255, 255, 220))
+        weightLabel:SetContentAlignment(5)
+
+        -- Buy Button
+        local buyButton = vgui.Create("DButton", itemPanel)
+        buyButton:SetSize(100, 30)
+        buyButton:SetPos(50, 200)
+        buyButton:SetText("Buy")
+        buyButton:SetFont("DermaDefault")
+        buyButton:SetTextColor(Color(255, 255, 255, 220))
+        buyButton.Paint = function(self, w, h)
             draw.RoundedBox(4, 0, 0, w, h, self:IsHovered() and Color(0, 120, 0, 200) or Color(0, 80, 0, 200))
         end
-        buy:SetEnabled(allowed)
-        buy.DoClick = function()
+        buyButton:SetEnabled(allowed)
+        buyButton.DoClick = function()
             net.Start("AJMRP_BuyItem")
             net.WriteString(id)
             net.SendToServer()
         end
     end
-    
+
     return shopPanel
 end
 
+-- Handle buy item response from server
 net.Receive("AJMRP_BuyItemResponse", function()
     local success = net.ReadBool()
     local message = net.ReadString()
-    LocalPlayer():ChatPrint(message)
+    if IsValid(LocalPlayer()) then
+        LocalPlayer():ChatPrint(message)
+    else
+        print("[AJMRP] BuyItemResponse: LocalPlayer not valid")
+    end
 end)
 
-local function CreateF1Menu()
+-- Main menu creation function
+local function CreateMainMenu()
     if not IsValid(LocalPlayer()) then
-        print("[AJMRP] Failed to open menu: LocalPlayer not valid")
+        print("[AJMRP] CreateMainMenu: LocalPlayer not valid")
         return
     end
 
@@ -167,54 +179,68 @@ local function CreateF1Menu()
         local frame = vgui.Create("DFrame")
         frame:SetSize(800, 600)
         frame:Center()
-        frame:SetTitle("")
-        frame:SetDraggable(false)
+        frame:SetTitle("AJMRP Menu")
+        frame:SetDraggable(true)
         frame:ShowCloseButton(true)
         frame:MakePopup()
         frame.Paint = function(self, w, h)
             draw.RoundedBox(8, 0, 0, w, h, Color(50, 50, 50, 220))
         end
-        
+
         local tabs = vgui.Create("DPropertySheet", frame)
         tabs:SetSize(frame:GetWide() - 20, frame:GetTall() - 20)
         tabs:SetPos(10, 10)
-        
+
+        -- Character Tab
         local characterTab = CreateCharacterTab(frame)
         if characterTab then
             tabs:AddSheet("Character", characterTab, "icon16/user.png")
         else
             print("[AJMRP] Failed to create Character tab")
         end
-        
+
+        -- Shop Tab
         local shopTab = CreateShopTab(frame)
         if shopTab then
             tabs:AddSheet("Shop", shopTab, "icon16/cart.png")
         else
             print("[AJMRP] Failed to create Shop tab")
         end
-        
-        local doorsTab = CreateDoorsTab(frame)
-        if doorsTab then
-            tabs:AddSheet("Doors", doorsTab, "icon16/door.png")
-        else
-            print("[AJMRP] Failed to create Doors tab")
-        end
     end)
 
     if not success then
-        print("[AJMRP] Error opening F1 menu: " .. tostring(err))
+        print("[AJMRP] Error creating menu: " .. tostring(err))
     else
-        print("[AJMRP] F1 menu opened successfully")
+        print("[AJMRP] Menu opened successfully")
     end
 end
 
+-- Console command to open the menu manually
 concommand.Add("ajmrp_menu", function()
     print("[AJMRP] Opening menu via console command")
-    CreateF1Menu()
+    CreateMainMenu()
 end)
 
--- Changed from ShowSpare1 to ShowHelp to match F1 binding (gm_showhelp)
-hook.Add("ShowHelp", "AJMRP_OpenMenu", function()
-    print("[AJMRP] ShowHelp hook triggered (F1 pressed)")
-    CreateF1Menu()
+-- Bind to F2 using ShowSpare1 (default F2 key binding should be gm_showspare1)
+hook.Add("ShowSpare1", "AJMRP_OpenMenu", function()
+    print("[AJMRP] ShowSpare1 hook triggered (F2 pressed)")
+    CreateMainMenu()
 end)
+
+-- Command to rebind F2 to gm_showspare1 if needed
+concommand.Add("ajmrp_bind_f2", function()
+    if not IsValid(LocalPlayer()) then
+        print("[AJMRP] Cannot bind F2: LocalPlayer not valid")
+        return
+    end
+    LocalPlayer():ConCommand("bind f2 gm_showspare1")
+    print("[AJMRP] F2 key bound to gm_showspare1. Press F2 to open the menu.")
+end)
+
+-- Notify player on spawn
+hook.Add("InitPostEntity", "AJMRP_NotifyMenuKey", function()
+    if not IsValid(LocalPlayer()) then return end
+    LocalPlayer():ChatPrint("Press F2 to open the AJMRP menu! If F2 doesn't work, type 'ajmrp_bind_f2' in the console to rebind it.")
+end)
+
+print("[AJMRP] cl_menu.lua loaded successfully")
