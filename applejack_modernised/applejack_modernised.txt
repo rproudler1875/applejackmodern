@@ -1,0 +1,8 @@
+"GameMode"
+{
+    "name"      "AppleJack Modernised RP"
+    "version"   "1.0.0"
+    "author"    "Grok & pie"
+    "description" "A modernized CityRP gamemode with immersive mechanics."
+    "base"      "sandbox"
+}
