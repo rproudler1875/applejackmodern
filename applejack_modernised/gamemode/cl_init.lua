@@ -18,14 +18,4 @@ function GM:HUDShouldDraw(name)
     return true
 end
 
-hook.Add("HUDPaint", "AJMRP_HideHUDInMenu", function()
-    if IsValid(AJMRP.MenuPanel) and IsValid(AJMRP.HUDPanel) then
-        print("[AJMRP] Menu open, hiding HUD")
-        AJMRP.HUDPanel.isVisible = false
-    elseif IsValid(AJMRP.HUDPanel) then
-        print("[AJMRP] Menu closed, showing HUD")
-        AJMRP.HUDPanel.isVisible = true
-    end
-end)
-
 print("[AJMRP] cl_init.lua loaded")
