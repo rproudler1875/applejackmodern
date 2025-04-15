@@ -177,4 +177,15 @@ net.Receive("AJMRP_BuyItem", function(len, ply)
     net.Send(ply)
 end)
 
+if SERVER then
+    util.AddNetworkString("AJMRP_UpdateInventory")
+
+    net.Receive("AJMRP_UpdateInventory", function(len, ply)
+        local newInventory = net.ReadTable()
+        ply:SetInventory(newInventory)
+        ply:SaveInventory()
+        ply:ChatPrint("Inventory updated!")
+    end)
+end
+
 print("[AJMRP] sh_economy.lua loaded")
